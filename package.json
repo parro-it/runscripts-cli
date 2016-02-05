@@ -28,5 +28,9 @@
   },
   "files": [
     "index.js"
-  ]
+  ],
+  "dependencies": {
+    "runscripts": "^0.1.0",
+    "yargs": "^3.32.0"
+  }
 }
