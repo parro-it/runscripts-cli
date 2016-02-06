@@ -35,6 +35,8 @@
     "runs": "index.js"
   },
   "dependencies": {
+    "abbrev": "^1.0.7",
+    "map-obj": "^1.0.1",
     "runscripts": "^0.1.0",
     "yargs": "^3.32.0"
   }

@@ -17,8 +17,48 @@ const handleError = err => {
     process.exit(-1);
   }
 
-  //process.stderr.write(`\n${err.stack}\n`);
+  process.stderr.write(`\n${err.stack}\n`);
 };
+
+const abbrev = require('abbrev');
+const map = require('map-obj');
+
+function abbrevScriptsNames(scripts) {
+  const scriptsKeys = Object.keys(scripts.object);
+
+  let idx = 0;
+  const scriptsAbbrev = map(
+    abbrev(scriptsKeys),
+    (key, value) => [idx++, {value, key}]
+  );
+  scriptsAbbrev.length = idx;
+
+  const abbreviations = Array.from(scriptsAbbrev);
+  console.log('abbreviations', abbreviations);
+  const commands = abbreviations.reduce((cmds, abbr) => {
+    console.log(cmds, abbr)
+    if (
+      !(abbr.value in cmds) ||
+      cmds[abbr.value] > abbr.key.length
+    ) {
+      cmds[abbr.value] = abbr.key.length;
+    }
+    return cmds;
+  }, {});
+
+  let idx2 = 0;
+  const scriptsList = map(commands, (name, abbrLen) =>
+    [idx2++, chalk.bold(name.slice(0, abbrLen)) +
+    name.slice(abbrLen)]
+  );
+  console.log(scriptsList);
+  scriptsList.length = idx2;
+
+  return '\n * ' +
+    Array.from(scriptsList)
+      .join('\n * ') +
+    '\n';
+}
 
 if (!command) {
   runscripts.readScriptsObject()
@@ -27,11 +67,7 @@ if (!command) {
 Usage: runs <command-name> [...command-options]
 
 Available commands:
-${
-  '\n * ' +
-  Object.keys(scripts.object)
-  .join('\n * ')
-}
+${abbrevScriptsNames(scripts)}
 `);
       process.exit(0);
     })
