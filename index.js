@@ -11,12 +11,13 @@ const command = argv._[0];
 
 
 const handleError = err => {
-  if (err.code === 'ENOSCRIPT' || err.code === 'ENOCONFIG') {
+
+  if (err.code === 'EINVALIDPKG' || err.code === 'ENOSCRIPT' || err.code === 'ENOCONFIG') {
     process.stderr.write(`\n${chalk.bold.red(err.code)}: ${err.message}\n`);
     process.exit(-1);
   }
 
-  process.stderr.write(`\n${err.stack}\n`);
+  //process.stderr.write(`\n${err.stack}\n`);
 };
 
 if (!command) {
