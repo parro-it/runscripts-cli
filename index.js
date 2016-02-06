@@ -80,6 +80,7 @@ ${abbrevScriptsNames(scripts)}
 
 
   runscripts(command, argv)
+    .then(proc => proc.exitPromise)
     .then(() => process.stdout.write(`\nDone ${chalk.bold.yellow(command)}.\n`))
     .catch(handleError);
 
