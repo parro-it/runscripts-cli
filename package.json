@@ -6,7 +6,8 @@
   "license": "MIT",
   "author": "parro-it",
   "scripts": {
-    "test": "eslint . && node test | faucet"
+    "test": "eslint . && node test | faucet",
+    "test_fixture": "echo fixture"
   },
   "keywords": [],
   "engines": {
@@ -24,11 +25,15 @@
     "eslint": "^1.10.3",
     "eslint-config-js": "^2.0.2",
     "faucet": "0.0.1",
+    "stream-string": "^1.0.2",
     "tape": "^4.2.2"
   },
   "files": [
     "index.js"
   ],
+  "cli": {
+    "runs": "index.js"
+  },
   "dependencies": {
     "runscripts": "^0.1.0",
     "yargs": "^3.32.0"

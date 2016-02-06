@@ -1,8 +1,11 @@
 const test = require('tape');
-const runscriptsCli = require('./');
+const runscripts = require('runscripts');
+const co = require('co');
+const concat = require('stream-string');
 
-test('it work!', t => {
-  const result = runscriptsCli();
+test('it work!', co.wrap(function * (t) {
+  const data = yield runscripts('test_fixture', {});
+  const result = yield concat(data.stdout);
   t.equal(result, 42);
   t.end();
-});
+}));
