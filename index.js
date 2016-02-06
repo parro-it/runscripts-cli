@@ -3,6 +3,7 @@
 'use strict';
 
 const yargs = require('yargs');
+const debug = require('debug')('runscripts-cli');
 const runscripts = require('runscripts');
 const chalk = require('chalk');
 
@@ -34,9 +35,9 @@ function abbrevScriptsNames(scripts) {
   scriptsAbbrev.length = idx;
 
   const abbreviations = Array.from(scriptsAbbrev);
-  console.log('abbreviations', abbreviations);
+  debug('abbreviations', abbreviations);
   const commands = abbreviations.reduce((cmds, abbr) => {
-    console.log(cmds, abbr)
+    debug(cmds, abbr);
     if (
       !(abbr.value in cmds) ||
       cmds[abbr.value] > abbr.key.length
@@ -51,7 +52,7 @@ function abbrevScriptsNames(scripts) {
     [idx2++, chalk.bold(name.slice(0, abbrLen)) +
     name.slice(abbrLen)]
   );
-  console.log(scriptsList);
+  debug('scriptsList', scriptsList);
   scriptsList.length = idx2;
 
   return '\n * ' +
