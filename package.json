@@ -31,7 +31,7 @@
   "files": [
     "index.js"
   ],
-  "cli": {
+  "bin": {
     "runs": "index.js"
   },
   "dependencies": {
