@@ -6,6 +6,9 @@ const yargs = require('yargs');
 const debug = require('debug')('runscripts-cli');
 const runscripts = require('runscripts');
 const chalk = require('chalk');
+const dedent = require('dedent-js');
+const abbrev = require('abbrev');
+const mapToArray = require('./modules/map-to-array');
 
 const argv = yargs.argv;
 const command = argv._[0];
@@ -21,59 +24,57 @@ const handleError = err => {
   process.stderr.write(`\n${err.stack}\n`);
 };
 
-const abbrev = require('abbrev');
-const map = require('map-obj');
-
 function getCommandsAbbreviation(scripts) {
   const scriptsKeys = Object.keys(scripts.object);
   return abbrev(scriptsKeys);
 }
 
+function shortenAbbrev(cmds, abbr) {
+  debug('shortenAbbrev', cmds, abbr);
+  if (
+    !(abbr.value in cmds) ||
+    cmds[abbr.value] > abbr.key.length
+  ) {
+    cmds[abbr.value] = abbr.key.length;
+  }
+  return cmds;
+}
+
 function abbrevScriptsNames(scripts) {
 
-  let idx = 0;
-  const scriptsAbbrev = map(
+  const abbreviations = mapToArray(
     getCommandsAbbreviation(scripts),
-    (key, value) => [idx++, {value, key}]
+    (key, value) => ({value, key})
   );
-  scriptsAbbrev.length = idx;
 
-  const abbreviations = Array.from(scriptsAbbrev);
   debug('abbreviations', abbreviations);
-  const commands = abbreviations.reduce((cmds, abbr) => {
-    debug(cmds, abbr);
-    if (
-      !(abbr.value in cmds) ||
-      cmds[abbr.value] > abbr.key.length
-    ) {
-      cmds[abbr.value] = abbr.key.length;
-    }
-    return cmds;
-  }, {});
 
-  let idx2 = 0;
-  const scriptsList = map(commands, (name, abbrLen) =>
-    [idx2++, chalk.bold(name.slice(0, abbrLen)) +
-    name.slice(abbrLen)]
+  const commands = abbreviations.reduce(shortenAbbrev, {});
+
+  const scriptsList = mapToArray(
+    commands,
+    (name, abbrLen) =>
+      chalk.bold(name.slice(0, abbrLen)) +
+      name.slice(abbrLen)
   );
   debug('scriptsList', scriptsList);
-  scriptsList.length = idx2;
 
-  return '\n * ' +
-    Array.from(scriptsList)
-      .join('\n * ') +
-    '\n';
+  return dedent`
+    * ${scriptsList.join('\n * ')}
+  `;
 }
 
 if (!command) {
   runscripts.readScriptsObject()
     .then(scripts => {
-      process.stdout.write(`
-Usage: runs <command-name> [...command-options]
+      process.stdout.write(dedent`
 
-Available commands:
-${abbrevScriptsNames(scripts)}
-`);
+        Usage: runs <command-name> [...command-options]
+
+        Available commands:
+         ${abbrevScriptsNames(scripts)}
+
+        `);
       process.exit(0);
     })
     .catch(handleError);
