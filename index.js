@@ -6,6 +6,7 @@ const yargs = require('yargs');
 const debug = require('debug')('runscripts-cli');
 const runscripts = require('runscripts');
 const chalk = require('chalk');
+const co = require('co');
 const dedent = require('dedent-js');
 const abbrev = require('abbrev');
 const mapToArray = require('./modules/map-to-array');
@@ -13,16 +14,20 @@ const mapToArray = require('./modules/map-to-array');
 const argv = yargs.argv;
 const command = argv._[0];
 
+const ok = chalk.bold.green('✓');
+const failure = chalk.bold.red('✘');
+const writeErr = msg => process.stderr.write(`\n${msg}\n`);
+const write = msg => process.stdout.write(`\n${msg}\n`);
 
-const handleError = err => {
+function handleError(err) {
 
   if (err.code === 'EINVALIDPKG' || err.code === 'ENOSCRIPT' || err.code === 'ENOCONFIG') {
-    process.stderr.write(`\n${chalk.bold.red('✘ ' + err.code)}: ${err.message}\n`);
+    writeErr(`${failure} ${chalk.bold.red(err.code)}: ${err.message}`);
     process.exit(-1);
   }
 
-  process.stderr.write(`\n${err.stack}\n`);
-};
+  writeErr(err.stack);
+}
 
 function getCommandsAbbreviation(scripts) {
   const scriptsKeys = Object.keys(scripts.object);
@@ -64,31 +69,38 @@ function abbrevScriptsNames(scripts) {
   `;
 }
 
-if (!command) {
-  runscripts.readScriptsObject()
-    .then(scripts => {
-      process.stdout.write(dedent`
+function usage(scripts) {
+  write(dedent`
+    Usage: runs <command-name> [...command-options]
 
-        Usage: runs <command-name> [...command-options]
-
-        Available commands:
-         ${abbrevScriptsNames(scripts)}
-
-        `);
-      process.exit(0);
-    })
-    .catch(handleError);
-
-} else {
-  runscripts.readScriptsObject()
-    .then(scripts => {
-      const abbreviations = getCommandsAbbreviation(scripts);
-      const commandName = abbreviations[command] || command;
-      process.stdout.write(`\nExecuting command ${chalk.bold.yellow(commandName)}…\n`);
-
-      runscripts(command, argv)
-        .then(proc => proc.exitPromise)
-        .then(() => process.stdout.write(`\n${chalk.bold.green('✓')} Done ${chalk.bold.yellow(commandName)}.\n`))
-        .catch(handleError);
-    });
+    Available commands:
+     ${abbrevScriptsNames(scripts)}
+  `);
+  process.exit(0);
 }
+
+function * run() {
+  const scripts = yield runscripts.readScriptsObject();
+
+  if (!command) {
+    return usage(scripts);
+  }
+
+  const abbreviations = getCommandsAbbreviation(scripts);
+  const commandName = chalk.bold.yellow(
+    abbreviations[command] || command
+  );
+
+  write(`Executing ${commandName}…`);
+
+  const proc = yield runscripts(command, argv);
+  const exitCode = yield proc.exitPromise;
+
+  if (exitCode) {
+    return writeErr(`${failure} ${commandName} failed.`);
+  }
+
+  write(`${ok} ${commandName} done.`);
+}
+
+co(run).catch(handleError);
