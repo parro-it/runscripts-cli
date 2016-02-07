@@ -14,7 +14,7 @@ const command = argv._[0];
 const handleError = err => {
 
   if (err.code === 'EINVALIDPKG' || err.code === 'ENOSCRIPT' || err.code === 'ENOCONFIG') {
-    process.stderr.write(`\n${chalk.bold.red(err.code)}: ${err.message}\n`);
+    process.stderr.write(`\n${chalk.bold.red('✘ ' + err.code)}: ${err.message}\n`);
     process.exit(-1);
   }
 
@@ -24,12 +24,16 @@ const handleError = err => {
 const abbrev = require('abbrev');
 const map = require('map-obj');
 
-function abbrevScriptsNames(scripts) {
+function getCommandsAbbreviation(scripts) {
   const scriptsKeys = Object.keys(scripts.object);
+  return abbrev(scriptsKeys);
+}
+
+function abbrevScriptsNames(scripts) {
 
   let idx = 0;
   const scriptsAbbrev = map(
-    abbrev(scriptsKeys),
+    getCommandsAbbreviation(scripts),
     (key, value) => [idx++, {value, key}]
   );
   scriptsAbbrev.length = idx;
@@ -75,13 +79,15 @@ ${abbrevScriptsNames(scripts)}
     .catch(handleError);
 
 } else {
+  runscripts.readScriptsObject()
+    .then(scripts => {
+      const abbreviations = getCommandsAbbreviation(scripts);
+      const commandName = abbreviations[command] || command;
+      process.stdout.write(`\nExecuting command ${chalk.bold.yellow(commandName)}…\n`);
 
-  process.stdout.write(`\nExecuting command ${chalk.bold.yellow(command)}.\n`);
-
-
-  runscripts(command, argv)
-    .then(proc => proc.exitPromise)
-    .then(() => process.stdout.write(`\nDone ${chalk.bold.yellow(command)}.\n`))
-    .catch(handleError);
-
+      runscripts(command, argv)
+        .then(proc => proc.exitPromise)
+        .then(() => process.stdout.write(`\n${chalk.bold.green('✓')} Done ${chalk.bold.yellow(commandName)}.\n`))
+        .catch(handleError);
+    });
 }

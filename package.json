@@ -37,6 +37,7 @@
   "dependencies": {
     "abbrev": "^1.0.7",
     "debug": "^2.2.0",
+    "dedent": "^0.6.0",
     "map-obj": "^1.0.1",
     "runscripts": "^0.4.0",
     "yargs": "^3.32.0"
