@@ -9,7 +9,7 @@ const chalk = require('chalk');
 const co = require('co');
 const dedent = require('dedent-js');
 const abbrev = require('abbrev');
-const mapToArray = require('./modules/map-to-array');
+const mapArray = require('map-array');
 const runscriptsInit = require('runscripts-init');
 
 const argv = yargs.argv;
@@ -48,7 +48,7 @@ function shortenAbbrev(cmds, abbr) {
 
 function abbrevScriptsNames(scripts) {
 
-  const abbreviations = mapToArray(
+  const abbreviations = mapArray(
     getCommandsAbbreviation(scripts),
     (key, value) => ({value, key})
   );
@@ -57,7 +57,7 @@ function abbrevScriptsNames(scripts) {
 
   const commands = abbreviations.reduce(shortenAbbrev, {});
 
-  const scriptsList = mapToArray(
+  const scriptsList = mapArray(
     commands,
     (name, abbrLen) =>
       chalk.bold(name.slice(0, abbrLen)) +

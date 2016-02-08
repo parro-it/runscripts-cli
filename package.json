@@ -39,6 +39,7 @@
     "co": "^4.6.0",
     "debug": "^2.2.0",
     "dedent-js": "^1.0.1",
+    "map-array": "^1.0.0",
     "map-obj": "^1.0.1",
     "runscripts": "^1.0.0",
     "runscripts-init": "^1.0.0",
