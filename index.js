@@ -81,12 +81,28 @@ function usage(scripts) {
 
 function * run() {
   const scripts = yield runscripts.readScriptsObject();
+  const abbreviations = getCommandsAbbreviation(scripts);
 
   if (!command) {
     return usage(scripts);
   }
 
-  const abbreviations = getCommandsAbbreviation(scripts);
+  if (command === 'show') {
+    const cmd = argv._[1];
+
+    const cmdName = chalk.bold.yellow(
+      abbreviations[cmd] || cmd
+    );
+    const source = yield runscripts.scriptSource(cmd);
+    return write(
+     dedent`
+      Source for ${cmdName}
+
+      ${source}
+     `
+    );
+  }
+
   const commandName = chalk.bold.yellow(
     abbreviations[command] || command
   );
