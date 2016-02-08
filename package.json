@@ -41,6 +41,7 @@
     "dedent-js": "^1.0.1",
     "map-obj": "^1.0.1",
     "runscripts": "^0.4.0",
+    "runscripts-init": "0.0.1",
     "yargs": "^3.32.0"
   }
 }

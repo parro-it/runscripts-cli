@@ -10,6 +10,7 @@ const co = require('co');
 const dedent = require('dedent-js');
 const abbrev = require('abbrev');
 const mapToArray = require('./modules/map-to-array');
+const runscriptsInit = require('runscripts-init');
 
 const argv = yargs.argv;
 const command = argv._[0];
@@ -101,6 +102,10 @@ function * run() {
       ${source}
      `
     );
+  }
+
+  if (command === 'init') {
+    return yield runscriptsInit();
   }
 
   const commandName = chalk.bold.yellow(
